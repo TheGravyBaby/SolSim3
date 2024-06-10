@@ -5,10 +5,14 @@ import { solSystem } from '../systems/new';
 class OrbitService {
     private orbitBodiesSubject: BehaviorSubject<OrbitBody[]>;
     private socket: WebSocket;
+    private lastFrame: OrbitBody[];
   
     constructor(initialBodies: OrbitBody[]) {
       this.orbitBodiesSubject = new BehaviorSubject<OrbitBody[]>(initialBodies);
       this.connectWebSocket()
+      this.getOrbitBodiesObservable().subscribe(newBodies => {
+        this.lastFrame = newBodies
+      })
     }
   
     getOrbitBodiesObservable() {
@@ -37,28 +41,46 @@ class OrbitService {
 
     connectWebSocket() {
       this.socket = new WebSocket('ws://localhost:8080/ws');
-
       this.socket.onopen = () => {
         var data = JSON.stringify(this.orbitBodiesSubject.value ?? initialBodies);
         this.socket.send(data);
-        console.log('WebSocket connection established');
       };
 
       this.socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        this.orbitBodiesSubject.next(data);
-      };
+        let data = JSON.parse(event.data);
+
+        if (Array.isArray(data) && data.length > 0 && data[0].Name) {
+
+          // we don't want to add burden on the server for rendering paths
+            for (let i=0; i < data.length; i++) {
+              var oldPaths = this.lastFrame[i].Path ?? []
+              if (oldPaths.length < 10000)
+                oldPaths.push(data[i].Position)
+              else {
+                oldPaths.shift()
+                oldPaths.push(data[i].Position)
+              }
+              data[i] = {...data[i], Path: oldPaths}
+            }
+
+            this.orbitBodiesSubject.next(data);
+        }
+        else {
+            console.log(data)
+        }
+    };
 
       this.socket.onerror = (error) => {
         console.error('WebSocket error:', error);
+
       };
 
-      
 
       this.socket.onclose = () => {
         console.log('WebSocket connection closed');
+        console.log(this.lastFrame)
         // Optionally try to reconnect
-        //setTimeout(() => this.connectWebSocket(), 5000);
+        // setTimeout(() => this.connectWebSocket(), 5000);
       };
     }
 

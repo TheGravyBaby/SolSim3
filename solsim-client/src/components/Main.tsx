@@ -81,7 +81,28 @@ const Main: React.FC = () => {
         .attr('cy', d => (-project3dPointTo2d(d.Position, xTheta, yTheta, zTheta).y / projDist + (viewportHeight * .9 / 2) + offsetY))
         .attr('r', d => d.PixelRadius)
         .attr('fill', d => d.Color);
-    };
+
+
+        const lineGenerator = d3.line<Position>()
+          .x(d => project3dPointTo2d(d, xTheta, yTheta, zTheta).x / projDist + (viewportWidth / 2) + offsetX)
+          .y(d => -project3dPointTo2d(d, xTheta, yTheta, zTheta).y / projDist + (viewportHeight * .9 / 2) + offsetY);
+
+        // Draw paths
+        bodyArr.forEach(body => {
+          if (body.Path && body.Path.length > 1) {
+            svg.append('path')
+              .datum(body.Path)
+              .attr('fill', 'none')
+              .attr('stroke', body.Color)
+              .attr('stroke-width', 1.5)
+              .attr('d', lineGenerator);
+    }
+  });
+    
+
+
+    }
+      
 
     // Mouse events for rotation and panning
     const onMouseDown = (event: MouseEvent) => {

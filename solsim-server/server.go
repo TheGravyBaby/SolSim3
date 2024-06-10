@@ -45,15 +45,13 @@ func errorHandler(w http.ResponseWriter, r *http.Request, status int) {
 }
 
 func handleWebSocket(w http.ResponseWriter, r *http.Request) {
-	log.Print("Establishing socket with: " + r.URL.Path)
+	log.Print("Establishing socket.")
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("Failed to upgrade to websocket:", err)
 		return
 	}
 	defer conn.Close()
-
-	go pingPongHandler(conn) // is this concurrency?
 
 	_, msg, err := conn.ReadMessage()
 	if err != nil {
@@ -64,20 +62,31 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal([]byte(msg), &orbitBodies)
 	if err != nil {
 		log.Println("Error unmarshalling message:", err)
+	} else {
+		timeout := time.Second * 15
+		keepAlive(conn, timeout)
+		calculatePathsOnSocket(orbitBodies, conn)
+
 	}
 
-	// Start a ticker to send updates
-	var calcs int = 0
+}
+
+func calculatePathsOnSocket(orbitBodies []models.Body, conn *websocket.Conn) {
+	var runCalcs = true
+	conn.SetCloseHandler(func(code int, text string) error {
+		runCalcs = false
+		log.Print("Socket Closed")
+		return nil
+	})
 	ticker := time.NewTicker(time.Second / 30)
 	defer ticker.Stop()
-	for {
+	for runCalcs {
 		select {
 		case <-ticker.C:
-			// Only send the latest positions every 24th of a second
 			data, err := json.Marshal(orbitBodies)
 			if err != nil {
 				log.Println("Error marshalling orbit bodies:", err)
-				continue
+				return
 			}
 
 			if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
@@ -85,49 +94,36 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			//log.Print("Calcs Per Frame: " + strconv.Itoa(calcs))
-			//calcs = 0
 		default:
 			// Calculate next positions as fast as possible
-			err = utils.CalculateNextPosition(orbitBodies)
-			calcs++
+			err := utils.CalculateNextPosition(orbitBodies)
 
 			if err != nil {
 				log.Println("Error calculating positions:", err)
 				return
 			}
-
 		}
 	}
-
 }
 
-// https://github.com/gorilla/websocket/issues/708
-func pingPongHandler(conn *websocket.Conn) {
-	// pingWait := 10 * time.Second
-	// pongWait := 10 * time.Second
-	// conn.SetReadDeadline(time.Now().Add(pingWait))
+func keepAlive(c *websocket.Conn, timeout time.Duration) {
+	lastResponse := time.Now()
+	c.SetPongHandler(func(msg string) error {
+		lastResponse = time.Now()
+		return nil
+	})
 
-	// defer func() {
-	// 	log.Print("Closing...")
-	// 	conn.Close()
-	// 	// some other stuff to do
-	// }()
-	// for {
-	// 	log.Print("Looping Looking For Ping...")
-	// 	_, p, err := conn.ReadMessage()
-	// 	if err != nil {
-	// 		fmt.Println(err)
-	// 		break
-	// 	}
-	// 	message := string(p)
-	// 	if message == "PING" {
-	// 		conn.SetReadDeadline(time.Now().Add(pongWait))
-	// 		conn.WriteJSON(("PONG"))
-	// 	}
-	// 	if message == "PONG" {
-	// 		conn.SetReadDeadline(time.Now().Add(pongWait))
-	// 		conn.WriteJSON(("PING"))
-	// 	}
-	//}
+	go func() {
+		for {
+			err := c.WriteMessage(websocket.PingMessage, []byte("keepalive"))
+			if err != nil {
+				return
+			}
+			time.Sleep(timeout / 2)
+			if time.Since(lastResponse) > timeout {
+				c.Close()
+				return
+			}
+		}
+	}()
 }
