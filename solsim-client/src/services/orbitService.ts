@@ -4,19 +4,30 @@ import { solSystem } from '../systems/new';
 
 class OrbitService {
     private orbitBodiesSubject: BehaviorSubject<OrbitBody[]>;
+    private calcDataSubject: BehaviorSubject<any>;
+    private isRunning: BehaviorSubject<any>;
+
     private socket: WebSocket;
-    private lastFrame: OrbitBody[];
+    private savedFrame: OrbitBody[];
+    private frameCounter: number = 0;
+    private framesPerPathSave = 3; 
   
     constructor(initialBodies: OrbitBody[]) {
       this.orbitBodiesSubject = new BehaviorSubject<OrbitBody[]>(initialBodies);
-      this.connectWebSocket()
-      this.getOrbitBodiesObservable().subscribe(newBodies => {
-        this.lastFrame = newBodies
-      })
+      this.calcDataSubject =  new BehaviorSubject<any>({CalcsPerFrame: 0});
+      this.isRunning =  new BehaviorSubject<boolean>(false);
     }
   
     getOrbitBodiesObservable() {
       return this.orbitBodiesSubject.asObservable();
+    }
+
+    getCalcDataObservable() {
+      return this.calcDataSubject.asObservable();
+    }
+
+    getIsRunningObservable() {
+      return this.isRunning.asObservable();
     }
   
     updateOrbitBody(name: string, newBody: Partial<OrbitBody>) {
@@ -38,47 +49,43 @@ class OrbitService {
       this.orbitBodiesSubject.next(updatedBodies);
     }
 
-
     connectWebSocket() {
       this.socket = new WebSocket('ws://localhost:8080/ws');
       this.socket.onopen = () => {
-        var data = JSON.stringify(this.orbitBodiesSubject.value ?? initialBodies);
+        console.log("Connecting to socket...")
+        var data = JSON.stringify(this.orbitBodiesSubject.value ??initialBodies);
+        this.savedFrame =  this.savedFrame ?? initialBodies
         this.socket.send(data);
       };
 
       this.socket.onmessage = (event) => {
-        let data = JSON.parse(event.data);
+        let data = JSON.parse(event.data)
 
-        if (Array.isArray(data) && data.length > 0 && data[0].Name) {
-
-          // we don't want to add burden on the server for rendering paths
-            for (let i=0; i < data.length; i++) {
-              var oldPaths = this.lastFrame[i].Path ?? []
-              if (oldPaths.length < 10000)
-                oldPaths.push(data[i].Position)
-              else {
-                oldPaths.shift()
-                oldPaths.push(data[i].Position)
-              }
-              data[i] = {...data[i], Path: oldPaths}
-            }
-
-            this.orbitBodiesSubject.next(data);
+        // determine if this is a body of path data, which is quite large
+        // and will gunk up the logs
+        if (data.OrbitBodies && data.CalcData) {
+          this.frameCounter++
+          var orbitData = data.OrbitBodies
+          var calcData = data.CalcData
+          if (this.frameCounter >= this.framesPerPathSave) 
+            this.calcDataSubject.next(calcData)
+          this.savePathsForFrame(orbitData)
+          this.orbitBodiesSubject.next(orbitData);
         }
         else {
-            console.log(data)
+          console.log("Socket Message : " + data)
         }
     };
 
       this.socket.onerror = (error) => {
         console.error('WebSocket error:', error);
-
+        this.isRunning.next(false)
       };
 
 
       this.socket.onclose = () => {
         console.log('WebSocket connection closed');
-        console.log(this.lastFrame)
+        this.isRunning.next(false)
         // Optionally try to reconnect
         // setTimeout(() => this.connectWebSocket(), 5000);
       };
@@ -91,11 +98,36 @@ class OrbitService {
         }
     }
 
+    
+    savePathsForFrame(data: OrbitBody[]) {
+    if (this.frameCounter >= this.framesPerPathSave) {
+      this.frameCounter = 0;
+      for (let i=0; i < data.length; i++) {
+        var oldPaths = this.savedFrame[i].Path
+        if (oldPaths.length < 10000){
+          oldPaths.push(data[i].Position)
+        }
+        else {
+          oldPaths.shift()
+          oldPaths.push(data[i].Position)
+        }
+        data[i] = {...data[i], Path: oldPaths}
+      }
+    }
+    else {
+      for (let i=0; i < data.length; i++) {
+        var oldPaths = this.savedFrame[i].Path
+        data[i] = {...data[i], Path: oldPaths}
+      }
+    }
+    this.savedFrame = data;
   }
-  
+
+
+}
   // Example initial data
-  const initialBodies = solSystem
-  
-  const orbitService = new OrbitService(initialBodies);
-  
-  export default orbitService;
+const initialBodies = solSystem
+
+const orbitService = new OrbitService(initialBodies);
+
+export default orbitService;

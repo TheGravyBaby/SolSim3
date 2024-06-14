@@ -27,3 +27,13 @@ type BodyPath struct {
 	Name string
 	Path []Position
 }
+
+type SolWebSocketData struct {
+	CalcData    CalcData
+	OrbitBodies []Body
+}
+
+type CalcData struct {
+	CalcsPerSecond int
+	TotalCalcs     int
+}
