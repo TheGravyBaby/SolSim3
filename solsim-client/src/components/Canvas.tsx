@@ -17,7 +17,6 @@ const Canvas: React.FC = () => {
   const [offsetY, setOffsetY] = useState(0);
   const [bodyArr, setBodyArr] = useState<OrbitBody[]>([]);
 
-
   const handleResize = () => {
     setViewportWidth(window.innerWidth);
     setViewportHeight(window.innerHeight);
@@ -43,14 +42,14 @@ const Canvas: React.FC = () => {
     const renderAxis = () => {
       // Axis lines data
       const axes = [
-        { start: { X: 0, Y: 0, Z: 0 }, end: { X: 200, Y: 0, Z: 0 }, color: 'red' }, // X-aXis
-        { start: { X: 0, Y: 0, Z: 0 }, end: { X: -200, Y: 0, Z: 0 }, color: 'greY' }, // X-aXis
+        { start: { X: 0, Y: 0, Z: 0 }, end: { X: 300, Y: 0, Z: 0 }, color: 'red' }, // X-aXis
+        { start: { X: 0, Y: 0, Z: 0 }, end: { X: -300, Y: 0, Z: 0 }, color: 'greY' }, // X-aXis
 
-        { start: { X: 0, Y: 0, Z: 0 }, end: { X: 0, Y: 200, Z: 0 }, color: 'green' }, // Y-aXis
-        { start: { X: 0, Y: 0, Z: 0 }, end: { X: 0, Y: -200, Z: 0 }, color: 'greY' }, // Y-aXis
+        { start: { X: 0, Y: 0, Z: 0 }, end: { X: 0, Y: 300, Z: 0 }, color: 'green' }, // Y-aXis
+        { start: { X: 0, Y: 0, Z: 0 }, end: { X: 0, Y: -300, Z: 0 }, color: 'greY' }, // Y-aXis
 
-        { start: { X: 0, Y: 0, Z: 0 }, end: { X: 0, Y: 0, Z: 200 }, color: 'blue' }, // Z-aXis
-        { start: { X: 0, Y: 0, Z: 0 }, end: { X: 0, Y: 0, Z: -200 }, color: 'greY' } // Z-aXis
+        { start: { X: 0, Y: 0, Z: 0 }, end: { X: 0, Y: 0, Z: 300 }, color: 'blue' }, // Z-aXis
+        { start: { X: 0, Y: 0, Z: 0 }, end: { X: 0, Y: 0, Z: -300 }, color: 'greY' } // Z-aXis
       ];
 
       // Draw axis lines

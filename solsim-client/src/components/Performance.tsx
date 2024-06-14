@@ -10,6 +10,21 @@ const Performance: React.FC = () => {
   const dataRef = useRef<number[]>([]);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [shitGraph, setShitGraph] = useState(true)
+  const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+
+  const handleResize = () => {
+    setViewportWidth(window.innerWidth);
+    setViewportHeight(window.innerHeight);
+  };
+  
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
 
   useEffect(() => {
     const subscription = orbitService.getCalcDataObservable().subscribe(s => {
@@ -25,8 +40,8 @@ const Performance: React.FC = () => {
   useEffect(() => {
     if (svgRef.current) { 
       const svg = d3.select(svgRef.current);
-      const width = 300;
-      const height = 100;
+      const width = viewportWidth * .35;
+      const height = viewportHeight * .1;
       const margin = { top: 30, right: 0, bottom: 30, left: 50 };
 
 
@@ -81,10 +96,10 @@ const Performance: React.FC = () => {
         ); 
         
       svg.append('text')
-        .attr('x', width)
-        .attr('y', height-15)
+        .attr('x', margin.left)
+        .attr('y', height - 20)
         .attr('dy', '1em')
-        .attr('text-anchor', 'end')
+        .attr('text-anchor', 'start')
         .style("font", "10px arial")
         .attr('fill', 'white')
         .text(`${calcsPerFrame} Calcs/s`);

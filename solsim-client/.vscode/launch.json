@@ -12,7 +12,11 @@
             "webRoot": "${workspaceFolder}/src",
             "sourceMapPathOverrides": {
                 "webpack:///src/*": "${webRoot}/*"
-              }
+              },
+            "runtimeArgs": [
+                //other args here,
+                "--experimental-modules"
+            ],
         }
     ]
 }

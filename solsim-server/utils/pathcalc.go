@@ -10,7 +10,7 @@ import (
 
 const GravConst float64 = 6.67408e-11
 
-func CalculateNextPosition(d []models.Body) error {
+func CalculateNextPosition(d []models.Body, granularity float64) error {
 	// Calculate the forces on each body
 	allForces := sumForces(d)
 
@@ -21,8 +21,8 @@ func CalculateNextPosition(d []models.Body) error {
 	for i := 0; i < len(d); i++ {
 		wg.Add(1)
 		go func(i int) {
-			defer wg.Done()
-			updatePosition(allForces[i]["Fx"], allForces[i]["Fy"], allForces[i]["Fz"], &d[i], float64(60))
+			updatePosition(allForces[i]["Fx"], allForces[i]["Fy"], allForces[i]["Fz"], &d[i], granularity)
+			wg.Done()
 		}(i)
 	}
 
@@ -35,12 +35,10 @@ func CalculateNextPosition(d []models.Body) error {
 func sumForces(bodyArray []models.Body) []map[string]float64 {
 	universalForceArray := make([]map[string]float64, len(bodyArray))
 	var wg sync.WaitGroup
-	var mu sync.Mutex // Mutex to protect shared memory
 
 	for i := 0; i < len(bodyArray); i++ {
 		wg.Add(1)
 		go func(i int) {
-			defer wg.Done()
 			Fx := 0.0
 			Fy := 0.0
 			Fz := 0.0
@@ -60,9 +58,9 @@ func sumForces(bodyArray []models.Body) []map[string]float64 {
 				"Fz": Fz,
 			}
 
-			mu.Lock()
 			universalForceArray[i] = forceMap
-			mu.Unlock()
+
+			wg.Done()
 		}(i)
 	}
 

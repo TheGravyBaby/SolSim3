@@ -26,14 +26,29 @@ const Footer: React.FC = () => {
   
   return (
     <footer className="footer">
-      <button onClick={runningState ? handleStop : handleStart}>
-        {runningState ? "Stop" : "Start"}
-      </button>
+      <div>
+        <button className="solSimButton">Recenter</button>
+        <br />
+        <button className="solSimButton">Something</button>
 
-      <button className="footerButton">Recenter</button>
-      <button className="footerButton">Toggle Paths</button>
-      <button className="footerButton">Reset Paths</button>
-      <button className="footerButton">Toggle Vectors</button>
+      </div>
+
+      <div className='StartStopContainer'>
+        <button className={runningState ? 'startStop stop' : 'startStop start' } onClick={runningState ? handleStop : handleStart}>
+          {runningState ? "STOP" : "START"}
+        </button>
+      </div>
+
+
+      <div>
+        <button className="solSimButton">Reset Paths</button>
+        <button className="solSimButton">Toggle Paths
+          
+        </button>
+        <br />
+        <button className="solSimButton">Toggle Vectors</button>
+        <button className="solSimButton">Toggle Grid </button>
+      </div>
 
     </footer>
   );
