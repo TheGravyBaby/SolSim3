@@ -1,0 +1,23 @@
+/* styles.css or app.component.css */
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  app-header {
+    /* Add styles for the header if needed */
+  }
+  
+  app-footer {
+    /* Add styles for the footer if needed */
+  }
+  
+  .canvas-container {
+    flex: 1;
+    display: flex;
+  }
+  
+  app-canvas {
+    flex: 1;
+  }

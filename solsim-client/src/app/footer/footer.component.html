@@ -1,0 +1,25 @@
+<footer class="footer">
+    <div>
+      <button class="solSimButton" (click)="recenter()">Recenter</button>
+      <br />
+      <button class="solSimButton">Something</button>
+
+    </div>
+
+    <div class='StartStopContainer' >
+      <button class= "{{ isConnected ? 'startStop stop' : 'startStop' }}" (click)="toggleConnection()">
+        {{ isConnected ? 'Stop' : 'Start' }}
+    </button>
+    </div>
+
+
+    <div>
+      <button class="solSimButton" (click)="togglePaths()">Toggle Paths</button>
+      <button class="solSimButton" (click)="resetPaths()">Reset Paths</button>
+        
+      <br />
+      <!-- <button class="solSimButton">Toggle Vectors</button>
+      <button class="solSimButton">Toggle Grid </button> -->
+    </div>
+
+  </footer>

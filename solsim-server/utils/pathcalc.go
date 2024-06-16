@@ -2,10 +2,8 @@ package utils
 
 import (
 	"math"
-	"solsim/dtos"
 	"solsim/models"
 	"sync"
-	"time"
 )
 
 const GravConst float64 = 6.67408e-11
@@ -116,33 +114,4 @@ func calculateForce(body1, body2 models.Body) [3]float64 {
 	Fz := Fmag * math.Sin(phi)
 
 	return [3]float64{Fx, Fy, Fz}
-}
-
-func CalculatePathsBatch(d dtos.PathsReqDto) ([]models.BodyPath, error) {
-	var result []models.BodyPath
-
-	// create a result array with an element for each body
-	for i := 0; i < len(d.Bodies); i++ {
-		result = append(result, models.BodyPath{Name: d.Bodies[i].Name})
-	}
-
-	startTime := time.Now()
-	for time.Since(startTime).Milliseconds() < d.Timeout {
-
-		// Calculate the forces on each body
-		allForces := sumForces(d.Bodies)
-
-		// Now apply those forces on the body, update the positions
-		for i := 0; i < len(d.Bodies); i++ {
-			updatePosition(allForces[i]["Fx"], allForces[i]["Fy"], allForces[i]["Fz"], &d.Bodies[i], float64(d.Grainularity))
-			result[i].Path = append(result[i].Path, d.Bodies[i].Position)
-		}
-
-		// Check if the loop time exceeds the timeout
-		if time.Since(startTime).Milliseconds() >= d.Timeout {
-			break
-		}
-	}
-
-	return result, nil
 }

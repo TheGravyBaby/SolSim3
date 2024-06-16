@@ -1,0 +1,43 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+}
+
+    
+.StartStopContainer {
+    position:absolute;
+    left: 42vw
+}
+
+.startStop {
+    height: 90%;
+    width: 16vw;
+
+    background-color: rgb(50, 50, 55);
+    border: 1px;
+    border-style: solid;
+    color: rgb(241, 241, 241);
+    border-color: rgb(96, 153, 95);
+    border-width: 2px;
+    border-radius: 5px 5px 5px 5px;
+    padding: 10px 18px;
+    text-align: center;
+    text-decoration: bold;
+    display: inline-block;
+    font-size: 30px;
+    margin: 4px 2px;
+    cursor: pointer;
+    font-weight: bold;
+    outline: none;
+}
+
+.stop {
+    border-color: rgb(153, 95, 95)
+}
