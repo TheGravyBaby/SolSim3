@@ -21,11 +21,11 @@ type RenderData struct {
 }
 
 type Body struct {
-	Mass       float64    `json:"Mass"`
-	Radius     float64    `json:"Radius"`
-	Position   Position   `json:"Position"`
-	Momentum   Momentum   `json:"Momentum"`
-	RenderData RenderData `json:"RenderData"`
+	Mass     float64  `json:"Mass"`
+	Radius   float64  `json:"Radius"`
+	Position Position `json:"Position"`
+	Momentum Momentum `json:"Momentum"`
+	// RenderData RenderData `json:"RenderData"`
 }
 
 type CalcSettings struct {

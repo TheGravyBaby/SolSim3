@@ -98,9 +98,7 @@ func calculatePathsOnSocket(calcSt models.CalcSettings, orbBods []models.Body, c
 			err := utils.CalculateNextPosition(orbBods, float64(calcSt.Granularity))
 			if err != nil {
 				log.Println("Error calculating positions:", err)
-				runCalcs = false
 				conn.Close()
-				close(endChan)
 				return
 			}
 
@@ -141,17 +139,13 @@ func calculatePathsOnSocket(calcSt models.CalcSettings, orbBods []models.Body, c
 				data, err := json.Marshal(message)
 				if err != nil {
 					log.Println("Error marshalling orbit bodies:", err)
-					runCalcs = false
 					conn.Close()
-					close(endChan) // Signal that the process has ended due to error
 					return
 				}
 
 				if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
 					log.Println("Error writing message:", err)
-					runCalcs = false
 					conn.Close()
-					close(endChan) // Signal that the process has ended due to error
 					return
 				}
 			}
@@ -164,10 +158,7 @@ func calculatePathsOnSocket(calcSt models.CalcSettings, orbBods []models.Body, c
 			select {
 			case <-time.After(time.Second * time.Duration(timeoutInSec)):
 				log.Println("Timeout Hit. Closing socket...")
-				runCalcs = false
-				time.Sleep(1 * time.Second) // Optional: to ensure all goroutines exit cleanly
 				conn.Close()
-				close(endChan) // Signal that the process has ended
 				return
 			case <-endChan:
 				return
@@ -178,7 +169,6 @@ func calculatePathsOnSocket(calcSt models.CalcSettings, orbBods []models.Body, c
 	// the parent function cannot return until endChan
 	// all these routines will keep spinning in their for loops
 	<-endChan
-	conn.Close()
 	return nil
 }
 

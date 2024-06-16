@@ -34,6 +34,14 @@ export class OrbitService {
     this.ctrl.resetPaths$.subscribe( () => {
       this.savedFrame.forEach(sf => sf.RenderData.Path = [])
     })
+
+    this.ctrl.newSolSystem$.subscribe(s => {
+      console.log(s)
+      this.disconnectWebSocket();
+      this.solSystemFrame.next(s);
+      this.savedFrame = s;
+      
+    })
   }
 
 

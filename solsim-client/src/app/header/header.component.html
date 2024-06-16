@@ -2,18 +2,16 @@
     <h3>SolSim3</h3>
     <label>
       Star Systems: 
-      <select name="selectedSystem">
-        <option>Option 1</option>
-        <option>Option 2</option>
-      </select> 
+      <select (change)="solSystemChanged($event)">
+        <option *ngFor="let system of solSystemsArray; let i = index" [value]="i">
+          {{ system[0].RenderData.Name || 'Unnamed System' }}
+        </option>
+      </select>
     </label>
-    
+     
     <label>
       Granularity: 
-      <select name="selectedGranularity">
-        <option>Option 1</option>
-        <option>Option 2</option>
-      </select> 
+      <select name="selectedGranularity"></select>
     </label>
 
     <div class = 'perfContainer'>

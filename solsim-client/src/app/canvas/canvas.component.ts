@@ -14,7 +14,7 @@ import { ControlsService } from '../services/controls.service';
 })
 export class CanvasComponent {
 
-  private cam = {xTheta: 15, yTheta: 15, zTheta: -25,  offsetX: 0, offsetY: 0, projDist: 10 * Math.pow(10, 9)};
+  private cam = {xTheta: 15, yTheta: 15, zTheta: -25,  offsetX: 0, offsetY: 0, projDist: 1 * Math.pow(10, 8)};
   private solSystem?: OrbitBody[];
   private viewportWidth = window.innerWidth;
   private viewportHeight = window.innerHeight;
@@ -39,7 +39,6 @@ export class CanvasComponent {
     });
     this.ctrl.recenter$.subscribe(() => this.recenter());
     this.ctrl.togglePaths$.subscribe(() => {this.renderPaths = !this.renderPaths; this.renderCanvas()});
-    this.ctrl.resetPaths$.subscribe(() => this.resetPaths());
     this.ctrl.toggleVectors$.subscribe(() => this.renderVectors = !this.renderVectors);
     this.ctrl.toggleGrid$.subscribe(() => this.renderGrid = !this.renderGrid);
 
@@ -192,7 +191,7 @@ export class CanvasComponent {
     // to improve the function, find where the mouse is pointing and adjust the offset
     // such that each zoom also causes a drag
     event.preventDefault();
-    const delta = this.cam.projDist * event.deltaY * 0.001;
+    const delta = this.cam.projDist * event.deltaY * 0.005;
     this.cam.projDist += delta;
     this.renderCanvas();
     // console.log("Scrollin!")
@@ -218,11 +217,8 @@ export class CanvasComponent {
   };
 
   recenter() {
-    this.cam = {xTheta: 15, yTheta: 15, zTheta: -25,  offsetX: 0, offsetY: 0, projDist: 10 * Math.pow(10, 9)}
-  }
-
-  resetPaths() {
-
+    this.cam = {xTheta: 15, yTheta: 15, zTheta: -25,  offsetX: 0, offsetY: 0, projDist: 10 * Math.pow(10, 8)}
+    this.renderCanvas();
   }
 
 }
