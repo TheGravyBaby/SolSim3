@@ -9,3 +9,10 @@ a fully three dimensional rendering system with a dynamic camera.
 
 Work in progress, currently chasing feature parity with SolSim2 where users can add and edit bodies easily. Once we're there, 
 the plan is to add verlet integratoin as well as collisions. 
+
+I also intend to add a docker image as well as a hosted server at some point, but for now, here's how to get started until then. 
+
+1. Download the repo.
+2. "go install" then "go run main.go" in the server folder.
+3. "npm install" along with "npm install angular/cli" then run an "ng serve"
+4. Go to localhost:4200 to run the app! :D
