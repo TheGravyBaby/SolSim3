@@ -72,6 +72,7 @@ func calculatePathsOnSocket(calcSt models.CalcSettings, orbBods []models.Body, c
 	var totalCalcs = 0
 	var frameRate = 48
 	var timeoutInSec = 300
+	fmt.Println(calcSt.Granularity)
 
 	ticker := time.NewTicker(time.Second / time.Duration(frameRate))
 	defer ticker.Stop()

@@ -27,6 +27,9 @@ export class CanvasComponent {
   private renderPaths = true;
   private renderVectors = false;
   private renderGrid = false;
+  private focus = false;
+  private focusName = "";
+  private convertToGeoCentric = false;
 
 
   constructor(private orbs: OrbitService, private ctrl: ControlsService, private elementRef: ElementRef) {}
@@ -41,6 +44,11 @@ export class CanvasComponent {
     this.ctrl.togglePaths$.subscribe(() => {this.renderPaths = !this.renderPaths; this.renderCanvas()});
     this.ctrl.toggleVectors$.subscribe(() => this.renderVectors = !this.renderVectors);
     this.ctrl.toggleGrid$.subscribe(() => this.renderGrid = !this.renderGrid);
+    this.ctrl.focusBody$.subscribe((name) => {
+      console.log("Changed body to: ", name)
+      this.focusName = name;
+      this.focus = true;
+    })
 
     this.renderCanvas();
   }
@@ -62,6 +70,10 @@ export class CanvasComponent {
 
   renderBodies = (bodyArr: OrbitBody[], svg: any) => {
     svg.selectAll('*').remove(); // Clear previous elements
+    
+    if (this.focus) {
+      this.focusBody(this.focusName, bodyArr)
+    } 
 
     const lineGenerator = d3.line<Position>()
       .x(d => this.project3dPointTo2d(d, this.cam.xTheta, this.cam.yTheta, this.cam.zTheta).x / this.cam.projDist + (this.viewportWidth / 2) + this.cam.offsetX)
@@ -178,6 +190,7 @@ export class CanvasComponent {
     this.isDraggingRef = true;
     this.lastXRef = event.clientX;
     this.lastYRef = event.clientY;
+    this.focus = false;
     // console.log("Click!")
   };
 
@@ -219,6 +232,19 @@ export class CanvasComponent {
   recenter() {
     this.cam = {xTheta: 15, yTheta: 15, zTheta: -25,  offsetX: 0, offsetY: 0, projDist: 10 * Math.pow(10, 8)}
     this.renderCanvas();
+  }
+
+  focusBody(name: string, bodyArr: OrbitBody[]) {
+    let body = bodyArr.find(b => b.RenderData.Name == name)
+    console.log(body)
+
+    if (body) {
+      var point = this.project3dPointTo2d(body.Position, this.cam.xTheta, this.cam.yTheta, this.cam.zTheta)
+      var x = -point.x / this.cam.projDist  //+ this.cam.offsetX
+      var y = point.y / this.cam.projDist  //+ this.cam.offsetY
+      this.cam.offsetX = x 
+      this.cam.offsetY = y
+    }
   }
 
 }

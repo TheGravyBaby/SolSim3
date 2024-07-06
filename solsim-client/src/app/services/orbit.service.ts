@@ -50,7 +50,6 @@ export class OrbitService {
 
     this.socket.onopen = () => {
       console.log("Connecting to socket...")
-      this.connectionStatus.next(true);
 
       var socketRequest = JSON.stringify({
         Settings: this.calcSet,
@@ -60,6 +59,8 @@ export class OrbitService {
       // console.log("Request To Socket: ", data)
       this.savedFrame =  this.savedFrame ?? this.savedFrame
       this.socket!.send(socketRequest);
+      this.connectionStatus.next(true)
+
     };
 
     this.socket.onmessage = (event) => {
@@ -124,5 +125,20 @@ export class OrbitService {
 
     }
     this.savedFrame = data;
+  }
+
+  async changeGranularity(grainularity: number) {
+    this.calcSet.Granularity = grainularity;
+    console.log("Changed Granularity!")
+
+    if (this.connectionStatus.value == true) {
+      this.disconnectWebSocket();
+      await this.sleep(1000)
+      this.connectWebSocket();
+    }
+  } 
+
+  sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }

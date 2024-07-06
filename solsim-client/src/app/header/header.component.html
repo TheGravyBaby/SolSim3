@@ -4,14 +4,27 @@
       Star Systems: 
       <select (change)="solSystemChanged($event)">
         <option *ngFor="let system of solSystemsArray; let i = index" [value]="i">
-          {{ system[0].RenderData.Name || 'Unnamed System' }}
+          {{ system.name|| 'Unnamed System' }}
+        </option>
+      </select>
+    </label>
+
+    <label>
+      Bodies: 
+      <select (change)="bodySelectedChangeEvent($event)" name="selectedBody" [(ngModel)]="bodyIndex">
+        <option *ngFor="let body of currentSystem; let i = index" [value]="i" >
+          {{ body.RenderData.Name|| 'Unnamed Body' }}
         </option>
       </select>
     </label>
      
     <label>
       Granularity: 
-      <select name="selectedGranularity"></select>
+      <select (change)="granularityChangeEvent($event)" name="selectedGranularity" [(ngModel)]="granularityIndex">
+        <option *ngFor="let value of granularityArray; let i = index" [value]="i" >
+          {{ value }}
+        </option>
+      </select>
     </label>
 
     <div class = 'perfContainer'>

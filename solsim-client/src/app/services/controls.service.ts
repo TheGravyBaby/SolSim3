@@ -12,6 +12,8 @@ export class ControlsService {
   private toggleVectorsSubject = new Subject<void>();
   private toggleGridSubject = new Subject<void>();
   private newSolSystem = new Subject<OrbitBody[]>;
+  private focusBody = new Subject<string>();
+
 
   recenter$ = this.recenterSubject.asObservable();
   togglePaths$ = this.togglePathsSubject.asObservable();
@@ -19,6 +21,8 @@ export class ControlsService {
   toggleVectors$ = this.toggleVectorsSubject.asObservable();
   toggleGrid$ = this.toggleGridSubject.asObservable();
   newSolSystem$ = this.newSolSystem.asObservable();
+  focusBody$ = this.focusBody.asObservable();
+
 
   recenter() {
     this.recenterSubject.next();
@@ -43,4 +47,10 @@ export class ControlsService {
   changeSol(system: OrbitBody[]) {
     this.newSolSystem.next(system);
   }
+
+  changeBody(name: string) {
+    this.focusBody.next(name);
+  }
+
+
 }
